@@ -9,7 +9,8 @@ CREATE TABLE `gateway` (
 	issuer TEXT NOT NULL,
 	length INT DEFAULT 16 NOT NULL,
 	iin_number TEXT NOT NULL,
-	luhn_validation BOOLEAN DEFAULT TRUE NOT NULL);
+	luhn_validation BOOLEAN DEFAULT TRUE NOT NULL,
+	enforce_expiry BOOLEAN DEFAULT FALSE NOT NULL);
 	
 	
 Each issuer will have their own table which contains account numbers/info and
@@ -20,15 +21,6 @@ CREATE TABLE `debit_<issuer name>` (
 	account_number TEXT NOT NULL CHECK (LENGTH(account_number) = 16),
 	balance REAL CHECK (balance >= 0) DEFAULT 0,
 	pin TEXT NOT NULL CHECK (LENGTH(pin) >= 4),
-	name TEXT NOT NULL);
-	
-and for credit:
-
-CREATE TABLE `credit_<issuer name>` (
-	id INTEGER PRIMARY KEY,
-	account_number TEXT NOT NULL CHECK (LENGTH(account_number) = 16),
-	credit_limit REAL NOT NULL CHECK (credit_limit >= 0) DEFAULT 0,
-	balance REAL NOT NULL CHECK (balance <= credit_limit) DEFAULT 0,
 	name TEXT NOT NULL);
 	
 	
