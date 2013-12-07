@@ -35,7 +35,7 @@ CREATE TABLE `transactions` (
 	merchant INTEGER,
 		FOREIGN KEY(merchant) REFERENCES merchant(id));
 	
-CREATE TABLE `merchant` (
+CREATE TABLE `merchants` (
 	id INTEGER PRIMARY KEY,
 	balance REAL NOT NULL DEFAULT 0,
 	name TEXT);

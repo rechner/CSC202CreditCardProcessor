@@ -20,7 +20,9 @@ public class PaymentGateway {
 		} catch (SQLiteException e) {
 			e.printStackTrace();
 		}
-		
+	}
+	
+	public void close() {
 		db.dispose();
 	}
 	
@@ -40,7 +42,7 @@ public class PaymentGateway {
 			// the table we queried probably doesn't exist. Create tables:
 			
 			// gateway table
-			st = db.prepare("CREATE TABLE `gateway` (id INTEGER PRIMARY KEY,"
+			st = db.prepare("CREATE TABLE IF NOT EXISTS `gateway` (id INTEGER PRIMARY KEY,"
 					+ "	issuer TEXT NOT NULL, length INT DEFAULT 16 NOT NULL,"
 					+ "	iin_number TEXT NOT NULL, luhn_validation BOOLEAN "
 					+ "DEFAULT TRUE NOT NULL, enforce_expiry BOOLEAN DEFAULT "
@@ -49,9 +51,8 @@ public class PaymentGateway {
 			st.dispose();
 			
 			//transactions table
-			st = db.prepare("CREATE TABLE `transactions` (id INTEGER PRIMARY KEY,"
-					+ "	issuer_id INTEGER, FOREIGN KEY(issuer_id) REFERENCES gateway(id),"
-					+ "	account_number TEXT NOT NULL, ammount REAL NOT NULL,"
+			st = db.prepare("CREATE TABLE IF NOT EXISTS `transactions` (id INTEGER PRIMARY KEY,"
+					+ "	issuer_id INTEGER, account_number TEXT NOT NULL, ammount REAL NOT NULL,"
 					+ "	timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,"
 					+ "	settled BOOLEAN DEFAULT NULL, merchant INTEGER,"
 					+ "	FOREIGN KEY(merchant) REFERENCES merchant(id));");
@@ -59,7 +60,7 @@ public class PaymentGateway {
 			st.dispose();
 			
 			//merchant table
-			st = db.prepare("CREATE TABLE `merchants` (id INTEGER PRIMARY KEY,"
+			st = db.prepare("CREATE TABLE IF NOT EXISTS `merchants` (id INTEGER PRIMARY KEY,"
 					+ " balance REAL NOT NULL DEFAULT 0, name TEXT);");
 			st.stepThrough();
 			st.dispose();
@@ -89,11 +90,11 @@ public class PaymentGateway {
 			
 			st = db.prepare("INSERT INTO gateway(issuer, length, iin_number, luhn_validation,"
 					+ " enforce_expiry) VALUES (?, ?, ?, ?, ?);");
-			st.bind(0,  issuerName);
-			st.bind(1, PANLength);
-			st.bind(2, iin_number);
-			st.bind(3, (isLuhn ? 1 : 0));  // beautiful ternary expressions
-			st.bind(4, (enforceExpiry ? 1: 0)); // (the SQL driver doesn't do booleans) 
+			st.bind(1,  issuerName);
+			st.bind(2, PANLength);
+			st.bind(3, iin_number);
+			st.bind(4, (isLuhn ? 1 : 0));  // beautiful ternary expressions
+			st.bind(5, (enforceExpiry ? 1: 0)); // (the SQL driver doesn't do booleans) 
 			st.stepThrough();
 			st.dispose();
 			
@@ -101,7 +102,8 @@ public class PaymentGateway {
 			this.AddCardIssuerAccountTable(issuerName, PANLength);
 			
 		} catch (SQLiteException e) {
-			throw new PaymentGatewayException("Unable to add card issuer to database: " + e.getMessage(), e);		
+			e.printStackTrace();
+			//throw new PaymentGatewayException("Unable to add card issuer to database: " + e.getMessage(), e);		
 		}
 		
 	}
@@ -117,19 +119,19 @@ public class PaymentGateway {
 	private void AddCardIssuerAccountTable(String issuerName, int PANLength) 
 			throws PaymentGatewayException {
 		
+		// FIXME: Check to see if issuer already exists.
+		
 		SQLiteStatement st;
 		
 		try {
-			
-			st = db.prepare("CREATE TABLE debit_? id INTEGER PRIMARY KEY,"
-					+ " account_number TEXT NOT NULL CHECK (LENGTH(account_number) = ?),"
+			// WARNING: THIS HAS SQL INJECTION.  NOT FOR PRODUCTION USE.  YOU'VE BEEN WARNED
+			st = db.prepare("CREATE TABLE `debit_" + issuerName + "` (id INTEGER PRIMARY KEY,"
+					+ " account_number TEXT NOT NULL CHECK (LENGTH(account_number) = " + PANLength + "),"
 					+ "	balance REAL CHECK (balance >= 0) DEFAULT 0,"
 					+ "	name TEXT NOT NULL);");
-			
-			st.bind(0, issuerName);
-			st.bind(1, PANLength);
+	
 			st.stepThrough();
-			st.dispose();			
+			st.dispose();		
 			
 		} catch (SQLiteException e) {
 			throw new PaymentGatewayException("Unable to add card issuer to database: " + e.getMessage(), e);
@@ -146,7 +148,7 @@ public class PaymentGateway {
 		
 		try {
 			st = db.prepare("INSERT INTO merchants(name) VALUES (?);");
-			st.bind(0, name);
+			st.bind(1, name);
 			st.stepThrough();
 			st.dispose();
 			
@@ -175,7 +177,7 @@ public class PaymentGateway {
 			st = db.prepare("SELECT id, issuer, length, iin_number, "
 					+ "luhn_validation, enforce_expiry "
 					+ "FROM gateway WHERE iin_number = ?;");
-			st.bind(0, iin);
+			st.bind(1, iin);
 			while (st.step()) {
 				id = st.columnInt(0);
 				issuerName = st.columnString(1);
