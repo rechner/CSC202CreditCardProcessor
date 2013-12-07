@@ -1,0 +1,56 @@
+NOVACard format:
+
+6273 6606 8396 2088
+
+Database schema:
+
+CREATE TABLE `gateway` (
+	id INTEGER PRIMARY KEY,
+	issuer TEXT NOT NULL,
+	length INT DEFAULT 16 NOT NULL,
+	iin_number TEXT NOT NULL,
+	luhn_validation BOOLEAN DEFAULT TRUE NOT NULL);
+	
+	
+Each issuer will have their own table which contains account numbers/info and
+balances:
+
+CREATE TABLE `debit_<issuer name>` (
+	id INTEGER PRIMARY KEY,
+	account_number TEXT NOT NULL CHECK (LENGTH(account_number) = 16),
+	balance REAL CHECK (balance >= 0) DEFAULT 0,
+	pin TEXT NOT NULL CHECK (LENGTH(pin) >= 4),
+	name TEXT NOT NULL);
+	
+and for credit:
+
+CREATE TABLE `credit_<issuer name>` (
+	id INTEGER PRIMARY KEY,
+	account_number TEXT NOT NULL CHECK (LENGTH(account_number) = 16),
+	credit_limit REAL NOT NULL CHECK (credit_limit >= 0) DEFAULT 0,
+	balance REAL NOT NULL CHECK (balance <= credit_limit) DEFAULT 0,
+	name TEXT NOT NULL);
+	
+	
+CREATE TABLE `transactions` (
+	id INTEGER PRIMARY KEY,
+	issuer_id INTEGER,
+		FOREIGN KEY(issuer_id) REFERENCES gateway(id),
+	account_number TEXT NOT NULL,
+	ammount REAL NOT NULL,
+	timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	settled BOOLEAN DEFAULT NULL,
+	merchant INTEGER,
+		FOREIGN KEY(merchant) REFERENCES merchant(id));
+	
+CREATE TABLE `merchant` (
+	id INTEGER PRIMARY KEY,
+	balance REAL NOT NULL DEFAULT 0,
+	name TEXT);
+	
+	
+	
+%A6394631054178689^STURGEON/ZACHARY ^62127011000042500425?;6394631054178689=621270110000425?
+;6273660683962088?
+;6273660683962088?
+
