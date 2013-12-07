@@ -21,6 +21,7 @@ public class PaymentGateway {
 			e.printStackTrace();
 		}
 		
+		db.dispose();
 	}
 	
 	/**
@@ -32,7 +33,7 @@ public class PaymentGateway {
 		SQLiteStatement st;
 		try {
 			st = db.prepare("SELECT name FROM merchant;");
-			while(st.step());
+			st.stepThrough();
 			st.dispose();
 		
 		} catch (SQLiteException e) {
@@ -44,7 +45,7 @@ public class PaymentGateway {
 					+ "	iin_number TEXT NOT NULL, luhn_validation BOOLEAN "
 					+ "DEFAULT TRUE NOT NULL, enforce_expiry BOOLEAN DEFAULT "
 					+ "FALSE NOT NULL);");
-			while (st.step());
+			st.stepThrough();
 			st.dispose();
 			
 			//transactions table
@@ -54,13 +55,13 @@ public class PaymentGateway {
 					+ "	timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,"
 					+ "	settled BOOLEAN DEFAULT NULL, merchant INTEGER,"
 					+ "	FOREIGN KEY(merchant) REFERENCES merchant(id));");
-			while (st.step());
+			st.stepThrough();
 			st.dispose();
 			
 			//merchant table
-			st = db.prepare("CREATE TABLE `merchant` (id INTEGER PRIMARY KEY,"
+			st = db.prepare("CREATE TABLE `merchants` (id INTEGER PRIMARY KEY,"
 					+ " balance REAL NOT NULL DEFAULT 0, name TEXT);");
-			while (st.step());
+			st.stepThrough();
 			st.dispose();
 			
 		}
@@ -71,8 +72,8 @@ public class PaymentGateway {
 	 * Adds a card issuer to the system.
 	 * 
 	 * @param issuerName String identifying the issuer belonging to this record
-	 * @param PANLength int Length of the personal account number (PAN).  Usually 16 digits.
-	 * @param iin_number Two digit string identifying the issuing organization.  Prefix for PAN.
+	 * @param PANLength integer Length of the personal account number (PAN).  Usually 16 digits.
+	 * @param iin_number Two digit string identifying the issuing organisation.  Prefix for PAN.
 	 * @param isLuhn Set to true if account numbers should be checked with the Luhn algorithm.
 	 * @return
 	 * 
@@ -91,9 +92,9 @@ public class PaymentGateway {
 			st.bind(0,  issuerName);
 			st.bind(1, PANLength);
 			st.bind(2, iin_number);
-			st.bind(3, (isLuhn ? 1 : 0));
-			st.bind(4, (enforceExpiry ? 1: 0));
-			while (st.step());
+			st.bind(3, (isLuhn ? 1 : 0));  // beautiful ternary expressions
+			st.bind(4, (enforceExpiry ? 1: 0)); // (the SQL driver doesn't do booleans) 
+			st.stepThrough();
 			st.dispose();
 			
 			// Add the supporting tables:
@@ -127,12 +128,72 @@ public class PaymentGateway {
 			
 			st.bind(0, issuerName);
 			st.bind(1, PANLength);
-			while(st.step());
+			st.stepThrough();
 			st.dispose();			
 			
 		} catch (SQLiteException e) {
 			throw new PaymentGatewayException("Unable to add card issuer to database: " + e.getMessage(), e);
 		}
+	}
+	
+	/**
+	 * Adds a merchant to the system with a zero balance.
+	 * @param name String name of the merchant (e.g. "Acme Corp")
+	 */
+	public void AddMerchant(String name) {
+		
+		SQLiteStatement st;
+		
+		try {
+			st = db.prepare("INSERT INTO merchants(name) VALUES (?);");
+			st.bind(0, name);
+			st.stepThrough();
+			st.dispose();
+			
+		} catch (SQLiteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Get information about the issuer from the Issuer Identification Number (IIN).
+	 * 
+	 * @param iin 2 digit IIN number (as string).
+	 * @return CardIssuer object, or null if issuer doesn't exist.
+	 */
+	public CardIssuer FindIssuer(String iin) {
+		
+		SQLiteStatement st;
+		
+		CardIssuer issuer = null;
+		int id, length;
+		String issuerName, iin_number;
+		boolean luhn_validation, enforce_expiry;
+		
+		try {
+			st = db.prepare("SELECT id, issuer, length, iin_number, "
+					+ "luhn_validation, enforce_expiry "
+					+ "FROM gateway WHERE iin_number = ?;");
+			st.bind(0, iin);
+			while (st.step()) {
+				id = st.columnInt(0);
+				issuerName = st.columnString(1);
+				length = st.columnInt(2);
+				iin_number = st.columnString(3);
+				luhn_validation = (st.columnInt(4) == 1 ? true : false);
+				enforce_expiry = (st.columnInt(5) == 1 ? true : false);
+				
+				issuer = new CardIssuer(id, issuerName, length, iin_number, 
+						luhn_validation, enforce_expiry);
+			}
+			
+		} catch (SQLiteException e) {
+			e.printStackTrace();
+		}
+		
+		return issuer;
+		
 	}
 
 }
