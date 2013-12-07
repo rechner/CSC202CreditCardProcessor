@@ -9,7 +9,7 @@ class PaymentCard {
 
 	public PaymentCard(String rawText) throws CardReadException {
 			//check error in reading card
-			if(rawText.matches("^[%;+]E?(.*)$")) {
+			if(rawText.matches("(%|;|\\+)E\\?.*")) {
 				throw new CardReadException(null);
 			}
 			
@@ -50,8 +50,7 @@ class PaymentCard {
     	// does the card have an expiration date first off
 		// determine if card has an expiration date
 		boolean hasExpirationDate = track2Fields.length == 2;
-		if(!hasExpirationDate) { return false; }
-		
+		if(!hasExpirationDate) { return false; } // <-- should this be an exception?
 		String dateString = track2Fields[1];
 			try {
 				Date expirationDate = new SimpleDateFormat("yyMM").parse(dateString.substring(0, 4));
