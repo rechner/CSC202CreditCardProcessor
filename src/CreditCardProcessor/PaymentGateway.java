@@ -164,8 +164,9 @@ public class PaymentGateway {
 	 * 
 	 * @param iin 2 digit IIN number (as string).
 	 * @return CardIssuer object, or null if issuer doesn't exist.
+	 * @throws PaymentGatewayException 
 	 */
-	public CardIssuer findIssuer(String iin) {
+	public CardIssuer findIssuer(String iin) throws PaymentGatewayException {
 		
 		SQLiteStatement st;
 		
@@ -192,7 +193,7 @@ public class PaymentGateway {
 			}
 			
 		} catch (SQLiteException e) {
-			e.printStackTrace();
+			throw new PaymentGatewayException(e.getMessage());
 		}
 		
 		return issuer;
@@ -221,8 +222,9 @@ public class PaymentGateway {
 	 * @param issuer
 	 * @param primaryAccountNumber
 	 * @return
+	 * @throws PaymentGatewayException 
 	 */
-	public CardHolder getCardHolder(CardIssuer issuer, String primaryAccountNumber) {
+	public CardHolder getCardHolder(CardIssuer issuer, String primaryAccountNumber) throws PaymentGatewayException {
 		
 		SQLiteStatement st;
 		CardHolder person = new CardHolder();
@@ -240,7 +242,7 @@ public class PaymentGateway {
 			}
 			
 		} catch (SQLiteException e) {
-			e.printStackTrace();
+			throw new PaymentGatewayException(e.getMessage());
 		}
 				
 		if (person.id != -1) 

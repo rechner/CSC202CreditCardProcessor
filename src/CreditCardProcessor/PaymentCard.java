@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-class PaymentCard {
+public class PaymentCard {
 	public String primaryAccountNumber, iin;
 	public String[] track2Fields;
 
