@@ -48,15 +48,21 @@
 	  cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAPUlEQVQYlWNgIBaIBE8RBeJkKBZFlzQG4g9A/B+KQWxjZAVnkCRh+Biygp9YFHwmyQT8bkDyRRoQZyL7AgAI8EC4llBEhQAAAABJRU5ErkJggg==") 4 4, crosshair;
 	}
 	
-	.sigPadButton {
-	  margin-left: auto;
-	  margin-right: auto;
-	  width: 50px;
+	#content {
+	   margin-left: auto;
+	   margin-right: auto;
+	   width: 500px;
+	}
+	
+	.button-group {
+		float: right;
+		margin-top: 10px;
 	}
 </style>
 </head>
 <body>
 	
+	<div id="content">
 	
 	cardholder name
 	amount to be charged
@@ -69,7 +75,12 @@
 					data-linecap="round" data-linewidth="2">
 	       		</canvas>
 		</div>
-		<button id="clear" class="pure-button sigPadButton" type="button">Clear</button>
-		<button id="checkOut" class="pure-button sigPadButton" type="button">Check Out!</button>
+		
+		<div class="button-group">
+			<button id="clear" class="pure-button sigPadButton" type="button">Clear</button>
+			<button id="checkOut" class="pure-button sigPadButton" type="button">Check Out!</button>
+		</div>
+		
+	</div>
 </body>
 </html>
