@@ -50,12 +50,17 @@
 						errorMessage += "<li>Cardholder not in database</li>";
 					}
 					else {
-						//TODO: CHANGE THE FUCKING ARGS to doTransaction() YOU GIT!
-						// TODO: Move this to confirmation.jsp
-						boolean success = gateway.doTransaction(cardHolder, "NOVA Cafe", toCharge);
-						if (!success) {
+						// insufficent funds... duh
+						if(cardHolder.balance < toCharge) {
 							errorMessage += "<li>Insufficient funds.</li>";
 						}
+						//set session variables
+						//TODO: MERCHANT IS HARDCODED
+						request.getSession().setAttribute("cardHolder", cardHolder);
+						request.getSession().setAttribute("merchant", "NOVA Cafe");
+						request.getSession().setAttribute("toCharge", toCharge);
+						// redirect that shit!
+						response.sendRedirect("confirmation.jsp");
 					}
 				}
 			} catch (CardReadException e) {

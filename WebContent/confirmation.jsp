@@ -5,6 +5,14 @@
 		import="java.text.NumberFormat"
 		import="java.util.Locale"
 %>
+<%
+	CardHolder cardHolder = request.getSession.getAttribute("cardHolder");
+	String merchant 	  = request.getSession.getAttribute("merchant");
+	double toCharge 	  = request.getSession.getAttribute("toCharge");
+	if(cardHolder == null || merchant == null || toCharge == 0.0) {
+		// IDK
+	}
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -113,18 +121,14 @@
 	<div id="content">
 	
 	<%
-		CardHolder person = new CardHolder();
-		person.name = "John Smith"; 
-		double amount = 2000.0;
-		
 		// create a money formatter
 		NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
 		// format it
-		String amountString = formatter.format(amount);
+		String amountString = formatter.format(toCharge);
 	%>
 	
-      <p style="text-align: left; color: grey"><%= person.name %> will be charged <strong><%= amountString %></strong><br>
-			By signing I authorise this electronic funds transfer.</p>
+      <p style="text-align: left; color: grey"><%= cardHolder.name %> will be charged <strong><%= amountString %></strong><br>
+			By signing I authorize this electronic funds transfer.</p>
 
 	
 		<div id="sigpad">
