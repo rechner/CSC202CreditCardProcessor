@@ -1,6 +1,58 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page isThreadSafe="false" %>
+<%@ page 
+	import="CreditCardProcessor.*" 
+%>
+
+<% 
+
+	String errorMessage = "";
+
+	if("POST".equals(request.getMethod())) {
+		String amount = request.getParameter("amount");
+		String ccn = request.getParameter("ccn");
+		// parameter
+		if(amount == null || amount.equals("") || ccn == null || ccn.equals("")) {
+			errorMessage += "<li>Error.  Parameters are empty or null.</li>";
+		}
+		else { 
+			try {		
+				PaymentCard paymentCard = new PaymentCard(ccn);
+				PaymentGateway gateway = new PaymentGateway("paymentproxy.unread.db");
+				CardIssuer issuer = gateway.findIssuer(paymentCard.iin);
+				if(issuer == null) {
+					// issuer not in the database
+					errorMessage = "<li>Error.  Card issuer not the database.</li>";
+					throw new PaymentGatewayException(null);
+				}
+				else {
+					CardHolder cardHolder = gateway.getCardHolder(issuer, paymentCard.primaryAccountNumber);
+					if(cardHolder == null) {
+						// cardholder not in database
+						errorMessage = "<li>Error.  Cardholder not in database</li>";
+						throw new PaymentGatewayException(null);
+					}
+					else {
+						//TODO: CHANGE THE FUCKING ARGS to doTransaction() YOU GIT!
+						boolean success = gateway.doTransaction(cardHolder, "NOVA Cafe", 1);
+						if (!success) {
+							errorMessage = "<li>Error.  Insufficient funds.";
+						}
+					}
+				}
+				// close this shit
+				gateway.close();
+			} catch(CardReadException e) {
+				//e.printStackRape();
+				errorMessage += "<li>Error.  Could not read the card.  Swipe again.<li>";
+			} catch(PaymentGatewayException e) {
+				errorMessage += "<li>Error.  Could not access database.<li>";
+			}
+		}
+	}
+%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -55,16 +107,36 @@
     .headroom {
     	margin-top: 50px;
     }
+    .error {
+  		background: #ffe7e7;
+  		color: #670000;
+  		padding: 
+    }
+    
     
 </style>
 </head>
 <body>
 
+
+
 <div class="pure-g-r headroom">
 	<div class="pure-u-1-3"></div> <!-- SPACERS -->
 	<div class="pure-u-1-3">
+	
+	<!--  THE ERROR RIBBON -->
+	<div class="pure-g-r">
+		<div class="pure-u-1">
+			<% if(!errorMessage.isEmpty()) { %>
+				<ul class="error"> 
+					<%=errorMessage%>
+				</ul>
+			<% } %>
+		</div>
+	</div>
+	
 		<div class="pure-g-r">
-		    <form class="pure-form">
+		    <form class="pure-form" method="post" action="virtualterminal.jsp">
 		    <fieldset>
 		    <legend class="center pure-u-1">Charge Amount</legend>
 			 
@@ -120,13 +192,5 @@ $(document).ready(function(){
 
     
 });
-
-// was supposed to be for 
-// #amount's input sanitation 
-// onsubmit="checkInput()"
-/* function checkInput() {
-	alert(document.getElementById("amount").innerText);
-} */
-
 </script>
 </html>
