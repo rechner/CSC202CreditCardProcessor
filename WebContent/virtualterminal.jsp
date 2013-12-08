@@ -5,6 +5,8 @@
 	import="CreditCardProcessor.*" 
 	import="java.util.Locale"
 	import="java.text.ParseException"
+	import="com.almworks.sqlite4java.*"
+	import="java.io.File"
 %>
 
 <% 
@@ -30,37 +32,41 @@
 			errorMessage += "<li>Insufficient amount to be charged: "+toCharge+"</li>";
 		} else { 
 			
+			PaymentGateway gateway = null;
 			try {		
 				PaymentCard paymentCard = new PaymentCard(ccn);
-				PaymentGateway gateway = new PaymentGateway("paymentproxy.unread.db");
+				File testFile = new File("paymentproxy.unread.db");
+				
+				gateway = new PaymentGateway("/tmp/paymentproxy.unread.db");
 				CardIssuer issuer = gateway.findIssuer(paymentCard.iin);
 				if(issuer == null) {
 					// issuer not in the database
 					errorMessage += "<li>Card issuer not the database.</li>";
-					throw new PaymentGatewayException(null);
 				}
 				else {
 					CardHolder cardHolder = gateway.getCardHolder(issuer, paymentCard.primaryAccountNumber);
 					if(cardHolder == null) {
 						// cardholder not in database
 						errorMessage += "<li>Cardholder not in database</li>";
-						throw new PaymentGatewayException(null);
 					}
 					else {
 						//TODO: CHANGE THE FUCKING ARGS to doTransaction() YOU GIT!
+						// TODO: Move this to confirmation.jsp
 						boolean success = gateway.doTransaction(cardHolder, "NOVA Cafe", toCharge);
 						if (!success) {
 							errorMessage += "<li>Insufficient funds.</li>";
 						}
 					}
 				}
-				// close this shit
-				gateway.close();
-			} catch(CardReadException e) {
+			} catch (CardReadException e) {
 				//e.printStackRape();
 				errorMessage += "<li>Could not read the card.  Swipe again.<li>";
-			} catch(PaymentGatewayException e) {
-				errorMessage += "<li>Could not access database: "+ e.getMessage() + "<li>";
+			} catch (PaymentGatewayException e) {
+				errorMessage += "<li>Could not access database: "+ e.getMessage() + "</li>";
+			} finally { 
+				// close this shit
+				if (gateway != null) 
+					gateway.close();
 			}
 		}
 	}
@@ -142,14 +148,14 @@
 	
 	<!--  THE ERROR RIBBON -->
 	<div class="pure-g-r">
-		<div class="pure-u-1 error">
-			<% if(!errorMessage.isEmpty()) { %>
+		<% if(!errorMessage.isEmpty()) { %>
+			<div class="pure-u-1 error">
 				<p><strong>An error occured while processing the request:</strong></p>
 				<ul> 
 					<%=errorMessage%>
 				</ul>
-			<% } %>
-		</div>
+			</div>
+		<% } %>
 	</div>
 	
 		<div class="pure-g-r">

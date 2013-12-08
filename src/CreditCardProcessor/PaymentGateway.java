@@ -1,9 +1,11 @@
 package CreditCardProcessor;
 import java.io.File;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import com.almworks.sqlite4java.*;
 
@@ -258,7 +260,7 @@ public class PaymentGateway {
 	 * a merchant account.
 	 * 
 	 * @param person CardHolder object from getCardholder()
-	 * @param merchantName
+	 * @param merchantName 
 	 * @param amount
 	 * @return True for success, false if insufficient funds.
 	 */
@@ -396,8 +398,7 @@ public class PaymentGateway {
 			throw new PaymentGatewayException("Unable to deposit to account: " + e.getMessage());
 		}
 		
-	}
-	
+	}	
 	
 }
 
