@@ -52,7 +52,7 @@ public class PaymentGateway {
 			
 			//transactions table
 			st = db.prepare("CREATE TABLE IF NOT EXISTS `transactions` (id INTEGER PRIMARY KEY,"
-					+ "	issuer_id INTEGER, account_number TEXT NOT NULL, ammount REAL NOT NULL,"
+					+ "	issuer_id INTEGER, account_number TEXT NOT NULL, amount REAL NOT NULL,"
 					+ "	timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,"
 					+ "	settled BOOLEAN DEFAULT NULL, merchant INTEGER,"
 					+ "	FOREIGN KEY(merchant) REFERENCES merchant(id));");
@@ -125,7 +125,7 @@ public class PaymentGateway {
 		
 		try {
 			// WARNING: THIS HAS SQL INJECTION.  NOT FOR PRODUCTION USE.  YOU'VE BEEN WARNED
-			st = db.prepare("CREATE TABLE `debit_" + issuerName + "` (id INTEGER PRIMARY KEY,"
+			st = db.prepare("CREATE TABLE IF NOT EXISTS `debit_" + issuerName + "` (id INTEGER PRIMARY KEY,"
 					+ " account_number TEXT NOT NULL CHECK (LENGTH(account_number) = " + PANLength + "),"
 					+ "	balance REAL CHECK (balance >= 0) DEFAULT 0,"
 					+ "	name TEXT NOT NULL);");
@@ -272,18 +272,20 @@ public class PaymentGateway {
 			db.exec("BEGIN");
 			debitCardHolderAccount(person, amount);
 			creditMerchantAccount(merchantName, amount);
-			//recordTransaction();
+			recordTransaction(person, amount, merchantName);
 			db.exec("COMMIT");
 
 		} catch (SQLiteException e) {
 			try {
 				db.exec("ROLLBACK");
+				e.printStackTrace();
+				throw new PaymentGatewayException("Unable to complete transaction");
 			} catch (SQLiteException e1) {
 				throw new PaymentGatewayException("Unable to complete transaction");
 			}
 		}
 		
-		return false;		
+		return true;		
 		
 	}
 	
@@ -310,6 +312,35 @@ public class PaymentGateway {
 		st.bind(2, merchantName);
 		st.stepThrough();
 		
+	}
+	
+	private void recordTransaction(CardHolder person, double amount, String merchantName)
+			throws SQLiteException {
+		
+		SQLiteStatement st = db.prepare("INSERT INTO transactions(issuer_id, "
+				+ "account_number, amount, merchant) VALUES"
+				+ "(?, ?, ?, (SELECT id FROM merchants WHERE name = ?));");
+		st.bind(1, person.issuer.id);
+		st.bind(2, person.id);
+		st.bind(3, amount);
+		st.bind(4, merchantName);
+		st.stepThrough();
+		
+	}
+	
+	private int getMerchantID(String merchantName) throws PaymentGatewayException {
+		int ret = -1;
+		SQLiteStatement st;
+		try {
+			st = db.prepare("SELECT id FROM merchants WHERE name = ?");
+			st.bind(1, merchantName);
+			while (st.step()) 
+				ret = st.columnInt(0);
+			
+		} catch (SQLiteException e) {
+			throw new PaymentGatewayException("Error while finding merchant ID");
+		}
+		return ret;
 	}
 	
 	private void cardHolderDeposit(CardHolder person, double amount) {

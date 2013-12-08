@@ -25,15 +25,14 @@ CREATE TABLE `debit_<issuer name>` (
 	
 	
 CREATE TABLE `transactions` (
-	id INTEGER PRIMARY KEY,
-	issuer_id INTEGER,
-		FOREIGN KEY(issuer_id) REFERENCES gateway(id),
-	account_number TEXT NOT NULL,
-	ammount REAL NOT NULL,
-	timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	settled BOOLEAN DEFAULT NULL,
-	merchant INTEGER,
-		FOREIGN KEY(merchant) REFERENCES merchant(id));
+id INTEGER PRIMARY KEY,
+issuer_id INTEGER,
+account_number INTEGER NOT NULL,
+amount REAL NOT NULL,
+timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+settled BOOLEAN DEFAULT NULL,
+merchant INTEGER,
+FOREIGN KEY(merchant) REFERENCES merchant(id));
 	
 CREATE TABLE `merchants` (
 	id INTEGER PRIMARY KEY,
