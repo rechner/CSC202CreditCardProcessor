@@ -1,7 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="CreditCardProcessor.*" 
+<%@ page 
+		import="CreditCardProcessor.*" 
 		import="java.text.NumberFormat"
+		import="java.util.Locale"
 %>
 <!DOCTYPE html>
 <html>
@@ -116,7 +118,7 @@
 		double amount = 2000.0;
 		
 		// create a money formatter
-		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
 		// format it
 		String amountString = formatter.format(amount);
 	%>
