@@ -123,19 +123,9 @@
 		String amountString = formatter.format(amount);
 	%>
 	
-	</br>
-	</br>
-	<div class="pure-menu pure-menu-open pure-menu-horizontal">
-	    <ul>
-	        <li><a href="#"><%= person.name %> will be charged</a></li>
-	        <li class="pure-menu-selected"><a href="#"><%= amountString %></a></li>
-	        <li><a href="#">By signing I authorise this electronic funds transfer.</a></li>
-	    </ul>
-	</div>
-	
-	</br>
-	</br>
-	</br>
+      <p style="text-align: left; color: grey"><%= person.name %> will be charged <strong><%= amountString %></strong><br>
+			By signing I authorise this electronic funds transfer.</p>
+
 	
 		<div id="sigpad">
 			<div>
