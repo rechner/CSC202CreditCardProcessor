@@ -3,41 +3,54 @@
 <%@ page isThreadSafe="false" %>
 <%@ page 
 	import="CreditCardProcessor.*" 
+	import="java.util.Locale"
+	import="java.text.ParseException"
 %>
 
 <% 
 
 	String errorMessage = "";
 
-	if("POST".equals(request.getMethod())) {
+	if ("POST".equals(request.getMethod())) {
+		double toCharge = -1;
 		String amount = request.getParameter("amount");
 		String ccn = request.getParameter("ccn");
-		// parameter
-		if(amount == null || amount.equals("") || ccn == null || ccn.equals("")) {
-			errorMessage += "<li>Error.  Parameters are empty or null.</li>";
+		
+		//parse amount input:
+		try {
+			toCharge = PaymentCard.stringToDouble(amount);
+		} catch (ParseException e) {
+			errorMessage += "<li>Unable to parse the amount specified.</li>";
 		}
-		else { 
+		
+		// parameter
+		if (amount == null || amount.equals("") || ccn == null || ccn.equals("")) {
+			errorMessage += "<li>Parameters are empty or null.</li>";
+		} else if (toCharge <= 0) {
+			errorMessage += "<li>Insufficient amount to be charged: "+toCharge+"</li>";
+		} else { 
+			
 			try {		
 				PaymentCard paymentCard = new PaymentCard(ccn);
 				PaymentGateway gateway = new PaymentGateway("paymentproxy.unread.db");
 				CardIssuer issuer = gateway.findIssuer(paymentCard.iin);
 				if(issuer == null) {
 					// issuer not in the database
-					errorMessage = "<li>Error.  Card issuer not the database.</li>";
+					errorMessage += "<li>Card issuer not the database.</li>";
 					throw new PaymentGatewayException(null);
 				}
 				else {
 					CardHolder cardHolder = gateway.getCardHolder(issuer, paymentCard.primaryAccountNumber);
 					if(cardHolder == null) {
 						// cardholder not in database
-						errorMessage = "<li>Error.  Cardholder not in database</li>";
+						errorMessage += "<li>Cardholder not in database</li>";
 						throw new PaymentGatewayException(null);
 					}
 					else {
 						//TODO: CHANGE THE FUCKING ARGS to doTransaction() YOU GIT!
-						boolean success = gateway.doTransaction(cardHolder, "NOVA Cafe", 1);
+						boolean success = gateway.doTransaction(cardHolder, "NOVA Cafe", toCharge);
 						if (!success) {
-							errorMessage = "<li>Error.  Insufficient funds.";
+							errorMessage += "<li>Insufficient funds.</li>";
 						}
 					}
 				}
@@ -45,9 +58,9 @@
 				gateway.close();
 			} catch(CardReadException e) {
 				//e.printStackRape();
-				errorMessage += "<li>Error.  Could not read the card.  Swipe again.<li>";
+				errorMessage += "<li>Could not read the card.  Swipe again.<li>";
 			} catch(PaymentGatewayException e) {
-				errorMessage += "<li>Error.  Could not access database.<li>";
+				errorMessage += "<li>Could not access database: "+ e.getMessage() + "<li>";
 			}
 		}
 	}
@@ -110,7 +123,10 @@
     .error {
   		background: #ffe7e7;
   		color: #670000;
-  		padding: 
+  		padding: 15px;
+  		margin-bottom: 10px;
+  		-moz-border-radius: 5px;
+		border-radius: 5px;	
     }
     
     
@@ -126,9 +142,10 @@
 	
 	<!--  THE ERROR RIBBON -->
 	<div class="pure-g-r">
-		<div class="pure-u-1">
+		<div class="pure-u-1 error">
 			<% if(!errorMessage.isEmpty()) { %>
-				<ul class="error"> 
+				<p><strong>An error occured while processing the request:</strong></p>
+				<ul> 
 					<%=errorMessage%>
 				</ul>
 			<% } %>

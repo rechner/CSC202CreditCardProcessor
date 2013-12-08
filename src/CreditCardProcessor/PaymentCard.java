@@ -1,8 +1,10 @@
 package CreditCardProcessor;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class PaymentCard {
 	public String primaryAccountNumber, iin;
@@ -71,6 +73,19 @@ public class PaymentCard {
 
 	private String getTrack2(String cardInput) {
 		return cardInput.replaceAll("^(.*);(.*?)\\?(.*)$", "$2");
+	}
+	
+	/** 
+	 * Converts a string representation of a number to a double, accounting for
+	 * commas and such.  For parsing input from a formatted webform.
+	 * @param amount
+	 * @return number as double
+	 * @throws ParseException 
+	 */
+	public static double stringToDouble(String amount) throws ParseException {
+		NumberFormat format = NumberFormat.getInstance(Locale.US);
+	    Number number = format.parse(amount);
+	    return number.doubleValue();
 	}
 
 }

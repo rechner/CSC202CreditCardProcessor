@@ -1,6 +1,20 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page isThreadSafe="false" %>
+<%@ page import="CreditCardProcessor.*" %>
+
+<%
+	String errorMessage = "";
+	if("POST".equals(request.getMethod())) {
+		
+		String rawCardData = request.getParameter("ccn");
+		String initialBalance = request.getParameter("amount");
+		String cardholderName = request.getParameter("name");
+		
+	}
+
+%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -67,7 +81,7 @@
 	<div class="pure-u-1-3"></div> <!-- SPACERS -->
 	<div class="pure-u-1-3">
 		<div class="pure-g-r">
-		    <form class="pure-form">
+		    <form class="pure-form" action="POST">
 		    <fieldset>
 		    <legend class="center pure-u-1">Register Cardholder</legend>
 			 
