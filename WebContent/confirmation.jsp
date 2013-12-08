@@ -6,11 +6,18 @@
 		import="java.util.Locale"
 %>
 <%
-	CardHolder cardHolder = request.getSession.getAttribute("cardHolder");
-	String merchant 	  = request.getSession.getAttribute("merchant");
-	double toCharge 	  = request.getSession.getAttribute("toCharge");
+	CardHolder cardHolder = (CardHolder) request.getSession().getAttribute("cardHolder");
+	String merchant = (String) request.getSession().getAttribute("merchant");
+	String chargeString = (String) request.getSession().getAttribute("toCharge");
+	double toCharge = 0;
+	
+	if (chargeString != null)
+		toCharge = Double.parseDouble(chargeString);
 	if(cardHolder == null || merchant == null || toCharge == 0.0) {
 		// IDK
+		cardHolder = new CardHolder();
+		merchant = "undefined";
+		
 	}
 %>
 <!DOCTYPE html>
