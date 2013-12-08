@@ -17,8 +17,8 @@
 		
 		 function validate_signature() {
 	            var encodedSignature = $("#sigpad canvas")[0].encode();
-	            if (encodedSignature != 0) {
-					document.getElementById("canvas-validation").value = encodedSignature;
+	            if (encodedSignature != "0") {
+	            	$("#canvas-validation").val("a");
 				}
 	        }
 	        
@@ -107,7 +107,7 @@
 		
 		<div class="button-group">
 		<form id="sigform">
-			<input type="text" required id="canvas-validation" name="canvas-validation">
+			<input type="text" required id="canvas-validation">
 			<button id="clear" class="pure-button sigPadButton" type="button">Clear</button>
 			<button id="checkOut" class="pure-button sigPadButton" type="submit">Check Out!</button>
 		</form>
