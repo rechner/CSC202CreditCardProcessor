@@ -3,6 +3,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.3.0/pure-min.css">
+
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Insert title here</title>
 <script src="http://codeorigin.jquery.com/jquery-2.0.3.min.js"></script>
