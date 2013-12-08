@@ -15,7 +15,19 @@
             clear_canvas($("#sigpad canvas")[0]);
         }).click();
 		
-		document.getElementById("canvas-validation").setCustomValidity("Please sign the signature pad");
+		 function validate_signature() {
+	            var encodedSignature = $("#sigpad canvas")[0].encode();
+	            if (encodedSignature != 0) {
+					document.getElementById("canvas-validation").value = encodedSignature;
+				}
+	        }
+	        
+			$("#checkOut").click(function() {      
+	            validate_signature();
+	        });
+			
+		
+		//document.getElementById("canvas-validation").setCustomValidity("Please sign the signature pad");
 	});
 </script>
     
@@ -94,7 +106,7 @@
 		</div>
 		
 		<div class="button-group">
-		<form>
+		<form id="sigform">
 			<input type="text" required id="canvas-validation">
 			<button id="clear" class="pure-button sigPadButton" type="button">Clear</button>
 			<button id="checkOut" class="pure-button sigPadButton" type="submit">Check Out!</button>

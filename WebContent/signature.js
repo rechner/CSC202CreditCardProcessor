@@ -183,7 +183,6 @@
     
     // compress
     k != i && j(0);
-    e = Zlib.deflate(l);
-    return e.length < l.length ? "b" + b95btoa(e) : "e" + b95btoa(l)
+    return l;
   }
 })();
