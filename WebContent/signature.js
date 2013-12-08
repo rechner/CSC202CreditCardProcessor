@@ -63,6 +63,11 @@
     }
   }
 
+  clear_canvas = function (canvas) {
+      a = canvas.getContext("2d");
+      a.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
   sig_decode = function (canvas, data) {
     // unwrap data
     data = data || "0"; // should this be changed into a big if statement?
