@@ -74,8 +74,8 @@
 	}
 	
 	#canvas-validation {
-		width: 0px;
-		height: 0px;
+		width: 1px;
+		height: 1px;
 		position: relative;
 		top: -60px;
 		left: -220px;		
@@ -107,7 +107,7 @@
 		
 		<div class="button-group">
 		<form id="sigform">
-			<input type="text" required id="canvas-validation">
+			<input type="text" required id="canvas-validation" name="canvas-validation">
 			<button id="clear" class="pure-button sigPadButton" type="button">Clear</button>
 			<button id="checkOut" class="pure-button sigPadButton" type="submit">Check Out!</button>
 		</form>
