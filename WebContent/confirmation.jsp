@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
+<%@ page import="CreditCardProcessor.*" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -89,14 +90,28 @@
     	color:red;
     	box-shadow: none;
 	}
+	
+	.pretty {
+	
+		text-align: center;
+		margin-top: 30px;
+		margin-bottom: 20px;
+	
+	}
 </style>
 </head>
 <body>
 	
 	<div id="content">
 	
-	cardholder name
-	amount to be charged
+	<%
+			CreditCardProcessor.CardHolder person = new CreditCardProcessor.CardHolder();
+			   person.name = "John Smith"; 
+			   double amount = 20.0;
+		%>
+	
+	<div class="pretty"><%= person.name %> will be charged <strong>$<%= amount %></strong><br>
+		By signing I authorise this electronic funds transfer.</div>
 	
 		<div id="sigpad">
 			<div>

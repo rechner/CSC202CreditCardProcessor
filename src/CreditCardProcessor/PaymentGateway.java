@@ -1,3 +1,4 @@
+package CreditCardProcessor;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -328,6 +329,32 @@ public class PaymentGateway {
 		
 	}
 	
+	/**
+	 * Returns how much money is in a merchant's account.
+	 * 
+	 * @param merchantName
+	 * @return
+	 * @throws PaymentGatewayException
+	 */
+	public double getMerchantBalance(String merchantName) throws PaymentGatewayException {
+		
+		double ret = -1;
+		
+		SQLiteStatement st;
+		try {
+			st = db.prepare("SELECT balance FROM merchants WHERE name = ?");
+			st.bind(1, merchantName);
+			while (st.step()) {
+				ret = st.columnDouble(0);
+			}
+			
+		} catch (SQLiteException e) {
+			throw new PaymentGatewayException("Unable to fetch merchant balance: " + e.getMessage());
+		}
+		
+		return ret;
+	}
+	
 	private int getMerchantID(String merchantName) throws PaymentGatewayException {
 		int ret = -1;
 		SQLiteStatement st;
@@ -343,9 +370,29 @@ public class PaymentGateway {
 		return ret;
 	}
 	
-	private void cardHolderDeposit(CardHolder person, double amount) {
+	/**
+	 * Adds funds to an account.
+	 * 
+	 * @param person CardHolder instance with account and issuer data.
+	 * @param amount amount to deposit.
+	 * @throws PaymentGatewayException 
+	 */
+	public void cardHolderDeposit(CardHolder person, double amount) 
+			throws PaymentGatewayException {
 		
-		// TODO
+		SQLiteStatement st;
+		
+		try {
+			st = db.prepare("UPDATE `debit_" + person.issuer.name + "` SET"
+					+ " balance = balance + ? WHERE id = ?");
+			
+			st.bind(1, amount);
+			st.bind(2, person.id);
+			st.stepThrough();
+			
+		} catch (SQLiteException e) {
+			throw new PaymentGatewayException("Unable to deposit to account: " + e.getMessage());
+		}
 		
 	}
 	

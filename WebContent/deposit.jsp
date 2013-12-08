@@ -13,7 +13,7 @@
 <!-- CDN WITCHERY -->
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Merchant Virtual Terminal</title>
+<title>Deposit to Account</title>
 <script>
     function setfocus() {
     	document.getElementById("ccn").value = "";
@@ -66,7 +66,7 @@
 		<div class="pure-g-r">
 		    <form class="pure-form">
 		    <fieldset>
-		    <legend class="center pure-u-1">Charge Amount</legend>
+		    <legend class="center pure-u-1">Deposit Funds</legend>
 			 
 			 <div class="pure-g-r">   
 			    <input class="pure-u-1-2" type="text" id="amount" name="amount" autofocus required>
@@ -80,7 +80,7 @@
 			
 			<div class="pure-u-1 center" id="message" >Ready to Swipe</div>
 		    
-			<input type="submit" class="pure-u-1 pure-button pure-button-primary" value="Charge It!"> 
+			<input type="submit" class="pure-u-1 pure-button pure-button-primary" value="Process Deposit"> 
 			
 			</fieldset>
 		    </form>
@@ -111,7 +111,7 @@ $(document).ready(function(){
     ccn.oninvalid = function(e) {
         e.target.setCustomValidity("");
         if (!e.target.validity.valid) {
-            e.target.setCustomValidity("Please enter a cost to be charged.");
+            e.target.setCustomValidity("Please enter amount to be credited.");
         }
     };
     ccn.oninput = function(e) {
