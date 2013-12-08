@@ -14,6 +14,8 @@
 		$("#clear").click(function() {      
             clear_canvas($("#sigpad canvas")[0]);
         }).click();
+		
+		document.getElementById("canvas-validation").setCustomValidity("Please sign the signature pad");
 	});
 </script>
     
@@ -58,6 +60,21 @@
 		float: right;
 		margin-top: 10px;
 	}
+	
+	#canvas-validation {
+		width: 0px;
+		height: 0px;
+		position: relative;
+		top: -60px;
+		left: -220px;		
+		border: none;
+   		background-color: transparent;
+	}
+	
+	[required] {
+    	color:red;
+    	box-shadow: none;
+	}
 </style>
 </head>
 <body>
@@ -77,8 +94,11 @@
 		</div>
 		
 		<div class="button-group">
+		<form>
+			<input type="text" required id="canvas-validation">
 			<button id="clear" class="pure-button sigPadButton" type="button">Clear</button>
-			<button id="checkOut" class="pure-button sigPadButton" type="button">Check Out!</button>
+			<button id="checkOut" class="pure-button sigPadButton" type="submit">Check Out!</button>
+		</form>
 		</div>
 		
 	</div>
