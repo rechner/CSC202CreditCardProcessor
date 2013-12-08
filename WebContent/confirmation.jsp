@@ -8,7 +8,7 @@
 <%
 	CardHolder cardHolder = (CardHolder) request.getSession().getAttribute("cardHolder");
 	String merchant = (String) request.getSession().getAttribute("merchant");
-	String chargeString = (String) request.getSession().getAttribute("toCharge");
+	String chargeString = "" + request.getSession().getAttribute("toCharge");
 	double toCharge = 0;
 	
 	if (chargeString != null)
