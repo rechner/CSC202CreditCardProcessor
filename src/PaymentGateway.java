@@ -16,7 +16,7 @@ public class PaymentGateway {
 		db = new SQLiteConnection(new File(databaseFile));
 		try {
 			db.open(true);
-			this.CreateTables();
+			this.createTables();
 		} catch (SQLiteException e) {
 			e.printStackTrace();
 		}
@@ -30,7 +30,7 @@ public class PaymentGateway {
 	 * Initialises an empty database.
 	 * @throws SQLiteException
 	 */
-	private void CreateTables() throws SQLiteException {
+	private void createTables() throws SQLiteException {
 		
 		SQLiteStatement st;
 		try {
@@ -79,7 +79,7 @@ public class PaymentGateway {
 	 * @return
 	 * 
 	 */
-	public void AddCardIssuer(String issuerName, int PANLength, 
+	public void addCardIssuer(String issuerName, int PANLength, 
 		String iin_number, boolean isLuhn, boolean enforceExpiry) 
 				throws PaymentGatewayException {
 		
@@ -99,7 +99,7 @@ public class PaymentGateway {
 			st.dispose();
 			
 			// Add the supporting tables:
-			this.AddCardIssuerAccountTable(issuerName, PANLength);
+			this.addCardIssuerAccountTable(issuerName, PANLength);
 			
 		} catch (SQLiteException e) {
 			e.printStackTrace();
@@ -116,7 +116,7 @@ public class PaymentGateway {
 	 * @param PANLength integer length that personal account numbers should be (usually 16).
 	 * @throws PaymentGatewayException 
 	 */
-	private void AddCardIssuerAccountTable(String issuerName, int PANLength) 
+	private void addCardIssuerAccountTable(String issuerName, int PANLength) 
 			throws PaymentGatewayException {
 		
 		// FIXME: Check to see if issuer already exists.
@@ -142,7 +142,7 @@ public class PaymentGateway {
 	 * Adds a merchant to the system with a zero balance.
 	 * @param name String name of the merchant (e.g. "Acme Corp")
 	 */
-	public void AddMerchant(String name) {
+	public void addMerchant(String name) {
 		
 		SQLiteStatement st;
 		
@@ -164,7 +164,7 @@ public class PaymentGateway {
 	 * @param iin 2 digit IIN number (as string).
 	 * @return CardIssuer object, or null if issuer doesn't exist.
 	 */
-	public CardIssuer FindIssuer(String iin) {
+	public CardIssuer findIssuer(String iin) {
 		
 		SQLiteStatement st;
 		
@@ -198,6 +198,127 @@ public class PaymentGateway {
 		
 	}
 
+	public void addCardholder(String issuerName, String primaryAccountNumber, String name, double balance) { 
+
+		SQLiteStatement st;
+		
+		try {
+			st = db.prepare("INSERT INTO `debit_" + issuerName + "` (account_number, "
+					+ "name, balance) VALUES (?, ?, ?);");
+			st.bind(1,  primaryAccountNumber);
+			st.bind(2, name);
+			st.bind(3, balance);
+			st.stepThrough();
+			st.dispose();
+		} catch (SQLiteException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Lookup function for an account.  Returns null if doesn't exist.
+	 * @param issuer
+	 * @param primaryAccountNumber
+	 * @return
+	 */
+	public CardHolder getCardHolder(CardIssuer issuer, String primaryAccountNumber) {
+		
+		SQLiteStatement st;
+		CardHolder person = new CardHolder();
+		
+		try {
+			st = db.prepare("SELECT id, balance, name FROM `debit_" + issuer.name + "`"
+					+ " WHERE account_number = ?");
+			st.bind(1, primaryAccountNumber);
+			
+			while (st.step()) {
+				person.id = st.columnInt(0);
+				person.balance = st.columnDouble(1);
+				person.name = st.columnString(2);
+				person.issuer = issuer;
+			}
+			
+		} catch (SQLiteException e) {
+			e.printStackTrace();
+		}
+				
+		if (person.id != -1) 
+			return person;
+		else 
+			return null;
+		
+	}
+			
+	
+	/**
+	 * Records a transaction and moves funds from a card holder account to
+	 * a merchant account.
+	 * 
+	 * @param person CardHolder object from getCardholder()
+	 * @param merchantName
+	 * @param amount
+	 * @return True for success, false if insufficient funds.
+	 */
+	public boolean doTransaction(CardHolder person, String merchantName, double amount) 
+			throws PaymentGatewayException {
+
+		if (person.balance < amount) {
+			return false;
+		}
+		
+		// begin transaction
+		try {
+			
+			db.exec("BEGIN");
+			debitCardHolderAccount(person, amount);
+			creditMerchantAccount(merchantName, amount);
+			//recordTransaction();
+			db.exec("COMMIT");
+
+		} catch (SQLiteException e) {
+			try {
+				db.exec("ROLLBACK");
+			} catch (SQLiteException e1) {
+				throw new PaymentGatewayException("Unable to complete transaction");
+			}
+		}
+		
+		return false;		
+		
+	}
+	
+	private void debitCardHolderAccount(CardHolder person, double amount) 
+			throws SQLiteException {
+		
+		SQLiteStatement st;
+		
+		st = db.prepare("UPDATE `debit_" + person.issuer.name + "` "
+				+ "SET balance = balance - ? WHERE id = ?");
+		st.bind(1, amount);
+		st.bind(2, person.id);
+		st.stepThrough();
+		
+	}
+	
+	private void creditMerchantAccount(String merchantName, double amount) 
+			throws SQLiteException {
+		
+		SQLiteStatement st;
+		
+		st = db.prepare("UPDATE merchants SET balance = balance + ? WHERE name = ?");
+		st.bind(1, amount);
+		st.bind(2, merchantName);
+		st.stepThrough();
+		
+	}
+	
+	private void cardHolderDeposit(CardHolder person, double amount) {
+		
+		// TODO
+		
+	}
+	
+	
 }
 
 
