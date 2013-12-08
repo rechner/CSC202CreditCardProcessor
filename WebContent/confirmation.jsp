@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="CreditCardProcessor.*" %>
+<%@ page import="CreditCardProcessor.*" 
+		import="java.text.NumberFormat"
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -98,6 +100,10 @@
 		margin-bottom: 20px;
 	
 	}
+	
+	body {
+		font-family: Helvetica;
+	}
 </style>
 </head>
 <body>
@@ -105,13 +111,29 @@
 	<div id="content">
 	
 	<%
-			CreditCardProcessor.CardHolder person = new CreditCardProcessor.CardHolder();
-			   person.name = "John Smith"; 
-			   double amount = 20.0;
-		%>
+		CardHolder person = new CardHolder();
+		person.name = "John Smith"; 
+		double amount = 2000.0;
+		
+		// create a money formatter
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		// format it
+		String amountString = formatter.format(amount);
+	%>
 	
-	<div class="pretty"><%= person.name %> will be charged <strong>$<%= amount %></strong><br>
-		By signing I authorise this electronic funds transfer.</div>
+	</br>
+	</br>
+	<div class="pure-menu pure-menu-open pure-menu-horizontal">
+	    <ul>
+	        <li><a href="#"><%= person.name %> will be charged</a></li>
+	        <li class="pure-menu-selected"><a href="#"><%= amountString %></a></li>
+	        <li><a href="#">By signing I authorise this electronic funds transfer.</a></li>
+	    </ul>
+	</div>
+	
+	</br>
+	</br>
+	</br>
 	
 		<div id="sigpad">
 			<div>
@@ -121,6 +143,8 @@
 					data-linecap="round" data-linewidth="2">
 	       		</canvas>
 		</div>
+		
+		
 		
 		<div class="button-group">
 		<form id="sigform">
