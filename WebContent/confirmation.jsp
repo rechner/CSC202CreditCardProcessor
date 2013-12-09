@@ -11,13 +11,25 @@
 	String chargeString = "" + request.getSession().getAttribute("toCharge");
 	double toCharge = 0;
 	
-	if (chargeString != null)
+	if ((chargeString != null) && (!"null".equals(chargeString)))
 		toCharge = Double.parseDouble(chargeString);
 	if(cardHolder == null || merchant == null || toCharge == 0.0) {
 		// IDK
 		cardHolder = new CardHolder();
 		merchant = "undefined";
+	}
+	
+	if ("POST".equals(request.getMethod())) {
+		PaymentGateway gateway = null;	
+		gateway = new PaymentGateway("/tmp/paymentproxy.unread.db");
 		
+		if (gateway.doTransaction(cardHolder, merchant, toCharge)) {
+			// success!  Redirect to succes.jsp
+			response.sendRedirect("success.jsp");
+		} else {
+			response.sendRedirect("fail.jsp");
+		}
+
 	}
 %>
 <!DOCTYPE html>
@@ -150,7 +162,7 @@
 		
 		
 		<div class="button-group">
-		<form id="sigform">
+		<form id="sigform" method="post">
 			<input type="text" required id="canvas-validation">
 			<button id="clear" class="pure-button sigPadButton" type="button">Clear</button>
 			<button id="checkOut" class="pure-button sigPadButton" type="submit">Check Out!</button>

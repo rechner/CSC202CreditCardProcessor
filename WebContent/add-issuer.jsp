@@ -7,7 +7,7 @@
 
 <%
 	String errorMessage = "";
-	boolean success = true;
+	boolean success = false;
 	if("POST".equals(request.getMethod())) {
 		
 		String issuerName = request.getParameter("name");
@@ -111,10 +111,25 @@
   		-moz-border-radius: 5px;
 		border-radius: 5px;	
     }
+    .primary-nav {
+	    max-width: 820px;
+	    margin: 0 auto;
+	    margin-top: 10px;
+	}
     
 </style>
 </head>
 <body>
+
+<div class="pure-menu pure-menu-open pure-menu-horizontal primary-nav">
+    <ul>
+        <li><a href="virtualterminal.jsp">Virtual Terminal</a></li>
+        <li class="pure-menu-selected"><a href="add-issuer.jsp">Add Card Issuer</a></li>
+        <li><a href="register.jsp">Add Cardholder</a></li>
+        <li><a href="deposit.jsp">Deposit</a></li>
+        <li><a href="check-balance.jsp">Balance Inquiry</a></li>
+    </ul>
+</div>
 
 <div class="pure-g-r headroom">
 	<div class="pure-u-1-3"></div> <!-- SPACERS -->

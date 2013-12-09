@@ -13,9 +13,9 @@
 	String errorMessage = "";
 	boolean success = false;
 	CardHolder cardHolder = new CardHolder();
+	String ccn = request.getParameter("ccn");
 
-	if ("POST".equals(request.getMethod())) {
-		String ccn = request.getParameter("ccn");
+	if ("POST".equals(request.getMethod()) || (("GET".equals(request.getMethod())) && (ccn != null))) {
 		
 		//validate
 		if (ccn == null || ccn.equals("")) {
@@ -54,7 +54,7 @@
 					gateway.close();
 			}
 		}
-	}
+	} 
 %>
 
 <!DOCTYPE html>
@@ -116,12 +116,25 @@
     	position: absolute;
     	top: -100px
 	}
+	.primary-nav {
+	    max-width: 820px;
+	    margin: 0 auto;
+	    margin-top: 10px;
+	}
     
 </style>
 </head>
 <body>
 
-
+<div class="pure-menu pure-menu-open pure-menu-horizontal primary-nav">
+    <ul>
+        <li><a href="virtualterminal.jsp">Virtual Terminal</a></li>
+        <li><a href="add-issuer.jsp">Add Card Issuer</a></li>
+        <li><a href="register.jsp">Add Cardholder</a></li>
+        <li><a href="deposit.jsp">Deposit</a></li>
+        <li class="pure-menu-selected"><a href="check-balance.jsp">Balance Inquiry</a></li>
+    </ul>
+</div>
 
 <div class="pure-g-r headroom">
 	<div class="pure-u-1-3"></div> <!-- SPACERS -->
