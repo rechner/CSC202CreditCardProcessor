@@ -49,17 +49,28 @@
 						errorMessage += "<li>Cardholder not in database</li>";
 					}
 					else {
+						if(paymentCard.isExpired()) {
+							//http gotos
+							response.sendRedirect("expired.jsp");
+						}
 						// insufficent funds... duh
 						if(cardHolder.balance < toCharge) {
 							errorMessage += "<li>Insufficient funds.</li>";
 						}
-						//set session variables
-						//TODO: MERCHANT IS HARDCODED
-						request.getSession().setAttribute("cardHolder", cardHolder);
-						request.getSession().setAttribute("merchant", "NOVA Cafe");
-						request.getSession().setAttribute("toCharge", toCharge);
-						// redirect that shit!
-						response.sendRedirect("confirmation.jsp");
+						else if(issuer.isLuhn) {
+							if(!paymentCard.isLuhnNumber()) {
+								errorMessage += "<li>Primary card number is not valid luhn number</li>";
+							}
+						}
+						else {
+							//set session variables
+							//TODO: MERCHANT IS HARDCODED
+							request.getSession().setAttribute("cardHolder", cardHolder);
+							request.getSession().setAttribute("merchant", "NOVA Cafe");
+							request.getSession().setAttribute("toCharge", toCharge);
+							// redirect that shit!
+							response.sendRedirect("confirmation.jsp");
+						}
 					}
 				}
 			} catch (CardReadException e) {
