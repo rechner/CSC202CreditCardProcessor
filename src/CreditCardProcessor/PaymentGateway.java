@@ -91,6 +91,7 @@ public class PaymentGateway {
 		
 		try {
 			
+			db.exec("BEGIN");
 			st = db.prepare("INSERT INTO gateway(issuer, length, iin_number, luhn_validation,"
 					+ " enforce_expiry) VALUES (?, ?, ?, ?, ?);");
 			st.bind(1,  issuerName);
@@ -103,9 +104,15 @@ public class PaymentGateway {
 			
 			// Add the supporting tables:
 			this.addCardIssuerAccountTable(issuerName, PANLength);
+			db.exec("COMMIT");
 			
 		} catch (SQLiteException e) {
-			e.printStackTrace();
+			try {
+				db.exec("ROLLBACK");
+			} catch (SQLiteException e1) {
+				// well, fuck
+			}
+			throw new PaymentGatewayException("Unable to add new issuer: Database error: "+e.getMessage());
 			//throw new PaymentGatewayException("Unable to add card issuer to database: " + e.getMessage(), e);		
 		}
 		
@@ -118,9 +125,10 @@ public class PaymentGateway {
 	 * @param issuerName String issuer name (e.g. "Discover", "Visa").
 	 * @param PANLength integer length that personal account numbers should be (usually 16).
 	 * @throws PaymentGatewayException 
+	 * @throws SQLiteException 
 	 */
 	private void addCardIssuerAccountTable(String issuerName, int PANLength) 
-			throws PaymentGatewayException {
+			throws PaymentGatewayException, SQLiteException {
 		
 		// FIXME: Check to see if issuer already exists.
 		
@@ -129,7 +137,7 @@ public class PaymentGateway {
 		try {
 			// WARNING: THIS HAS SQL INJECTION.  NOT FOR PRODUCTION USE.  YOU'VE BEEN WARNED
 			st = db.prepare("CREATE TABLE IF NOT EXISTS `debit_" + issuerName + "` (id INTEGER PRIMARY KEY,"
-					+ " account_number TEXT NOT NULL CHECK (LENGTH(account_number) = " + PANLength + "),"
+					+ " account_number TEXT UNIQUE NOT NULL CHECK (LENGTH(account_number) = " + PANLength + "),"
 					+ "	balance REAL CHECK (balance >= 0) DEFAULT 0,"
 					+ "	name TEXT NOT NULL);");
 	
@@ -137,6 +145,7 @@ public class PaymentGateway {
 			st.dispose();		
 			
 		} catch (SQLiteException e) {
+			db.exec("ROLLBACK");
 			throw new PaymentGatewayException("Unable to add card issuer to database: " + e.getMessage(), e);
 		}
 	}
@@ -230,6 +239,7 @@ public class PaymentGateway {
 		
 		SQLiteStatement st;
 		CardHolder person = new CardHolder();
+		person.primaryAccountNumber = primaryAccountNumber;
 		
 		try {
 			st = db.prepare("SELECT id, balance, name FROM `debit_" + issuer.name + "`"

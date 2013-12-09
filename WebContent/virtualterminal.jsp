@@ -35,7 +35,6 @@
 			PaymentGateway gateway = null;
 			try {		
 				PaymentCard paymentCard = new PaymentCard(ccn);
-				File testFile = new File("paymentproxy.unread.db");
 				
 				gateway = new PaymentGateway("/tmp/paymentproxy.unread.db");
 				CardIssuer issuer = gateway.findIssuer(paymentCard.iin);
@@ -65,7 +64,7 @@
 				}
 			} catch (CardReadException e) {
 				//e.printStackRape();
-				errorMessage += "<li>Could not read the card.  Swipe again.<li>";
+				errorMessage += "<li>Could not read the card.  Swipe again.</li>";
 			} catch (PaymentGatewayException e) {
 				errorMessage += "<li>Could not access database: "+ e.getMessage() + "</li>";
 			} finally { 

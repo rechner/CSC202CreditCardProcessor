@@ -1,15 +1,73 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page isThreadSafe="false" %>
-<%@ page import="CreditCardProcessor.*" %>
+<%@ page import="CreditCardProcessor.*"
+		 import="java.text.ParseException" 
+		 import="java.net.URLEncoder"
+%>
 
 <%
 	String errorMessage = "";
+	boolean success = false;
+	
 	if("POST".equals(request.getMethod())) {
 		
 		String rawCardData = request.getParameter("ccn");
 		String initialBalance = request.getParameter("amount");
 		String cardholderName = request.getParameter("name");
+		
+		if ((rawCardData == null) || (initialBalance == null) || (cardholderName == null)) {
+			errorMessage += "<li>Error validating input.  Please try again.</li>";
+		} else {
+			// add card to database:
+			
+			double funds = 0;
+			//parse amount input:
+			try {
+				funds = PaymentCard.stringToDouble(initialBalance);
+			} catch (ParseException e) {
+				errorMessage += "<li>Unable to parse the amount specified.</li>";
+			}
+				
+			PaymentGateway gateway = null;
+			try {		
+				PaymentCard paymentCard = new PaymentCard(rawCardData);
+				
+				gateway = new PaymentGateway("/tmp/paymentproxy.unread.db");
+				CardIssuer issuer = gateway.findIssuer(paymentCard.iin);
+				if(issuer == null) {
+					// issuer not in the database
+					errorMessage += "<li>The card issuer for the swiped card was"
+						+ " not found in the database.  Click <a href=\"add-issuer.jsp\">here</a> to add one.</li>";
+				}
+				else {
+					CardHolder cardHolder = gateway.getCardHolder(issuer, paymentCard.primaryAccountNumber);
+					if(cardHolder == null) {
+						// cardholder not found in database, so we'll add a new cardholder account:
+						gateway.addCardholder(issuer.name, paymentCard.primaryAccountNumber, cardholderName, funds);
+						success = true;
+					}
+					else {
+						errorMessage += "<li>A card issuer with the same primary account number already exists. "+
+						"click <a href=\"check-balance.jsp?ccn="+ 
+						URLEncoder.encode(rawCardData, "UTF-8") +"\">here</a> to check account balence.</li>";
+					}
+				}
+				
+			// close this shit
+			if (gateway != null) 
+				gateway.close();
+			
+			} catch (CardReadException e) {
+				//e.printStackRape();
+				errorMessage += "<li>Could not read the card.  Swipe again.</li>";
+			} catch (PaymentGatewayException e) {
+				errorMessage += "<li>Could not access database: "+ e.getMessage() + "</li>";
+			} finally { 
+				
+			}
+			
+		}
 		
 	}
 
@@ -72,6 +130,24 @@
     #name {
     	margin-bottom: 20px;
     }
+     .error {
+  		background: #ffe7e7;
+  		color: #670000;
+  		padding: 15px;
+  		margin-bottom: 10px;
+  		-moz-border-radius: 5px;
+		border-radius: 5px;	
+    }
+    .success {
+  		background: #daf7de;
+  		color: #0f4416;
+  		text-align: center;
+  		padding: 5px;
+  		inner-padding: 5px;
+  		margin-bottom: 10px;
+  		-moz-border-radius: 5px;
+		border-radius: 5px;	
+    }
     
 </style>
 </head>
@@ -80,8 +156,26 @@
 <div class="pure-g-r headroom">
 	<div class="pure-u-1-3"></div> <!-- SPACERS -->
 	<div class="pure-u-1-3">
+		
+		<!--  THE ERROR RIBBON -->
 		<div class="pure-g-r">
-		    <form class="pure-form" action="POST">
+			<% if(!errorMessage.isEmpty()) { %>
+				<div class="pure-u-1 error">
+					<p><strong>An error occured while processing the request:</strong></p>
+					<ul> 
+						<%= errorMessage %>
+					</ul>
+				</div>
+			<% } %>
+			<% if (success) { %>
+				<div class="pure-u-1 success">
+					<p>The card holder was successfully added to the database.</p>
+				</div>
+			<% } %>
+		</div>
+		
+		<div class="pure-g-r">
+		    <form class="pure-form" method="post">
 		    <fieldset>
 		    <legend class="center pure-u-1">Register Cardholder</legend>
 			 

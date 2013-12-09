@@ -7,9 +7,7 @@
 	import="java.text.NumberFormat"
 	import="java.text.ParseException"
 	import="com.almworks.sqlite4java.*"
-	import="java.io.File"
-%>
-
+	import="java.io.File" %>
 <% 
 
 	String errorMessage = "";
@@ -116,7 +114,7 @@
     }
     input[type="submit"] {
     	position: absolute;
-    	top: -1000px
+    	top: -100px
 	}
     
 </style>
