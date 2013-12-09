@@ -62,14 +62,17 @@
 <title>Register Card</title>
 <style>
     #ccn {
-      width: 0px;
-      height: 0px;
+      position: absolute;
+      left: -1000px;
+      width: 2px;
+      height: 25px;
       border: none;
       background: transparent;
       float:right;
       margin-right: 135px;
     }
     #message {
+      margin-top: 20px;
       color: green;
       visibility: hidden;
       margin-bottom: 20px;

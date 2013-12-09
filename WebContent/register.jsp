@@ -100,14 +100,17 @@
 </script>
 <style>
     #ccn {
-      width: 0px;
-      height: 0px;
+      position: absolute;
+      left: -1000px;
+      width: 2px;
+      height: 25px;
       border: none;
       background: transparent;
       float:right;
       margin-right: 135px;
     }
     #message {
+      margin-top: 20px;
       color: green;
       visibility: hidden;
       margin-bottom: 20px;
@@ -205,7 +208,7 @@
 			    	Click to Swipe Card
 			    </button>
 			</div>
-			<input class="pure-u-1" type="text" id="ccn" name="ccn" onblur="hidemessage();" 
+			<input class="pure-u-1" type="text" id="ccn" name="ccn" onblur="hidemessage();" autocomplete="off" 
 			 required title="Please press the button above and slide a card to continue.">
 			
 			<div class="pure-u-1 center" id="message" >Ready to Swipe</div>

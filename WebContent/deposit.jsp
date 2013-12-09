@@ -91,14 +91,17 @@
 </script>
 <style>
     #ccn {
-      width: 0px;
-      height: 0px;
+      position: absolute;
+      left: -1000px;
+      width: 2px;
+      height: 25px;
       border: none;
       background: transparent;
       float:right;
       margin-right: 135px;
     }
     #message {
+      margin-top: 20px;
       color: green;
       visibility: hidden;
       margin-bottom: 20px;
@@ -175,7 +178,7 @@
 		    <legend class="center pure-u-1">Deposit Funds</legend>
 			 
 			 <div class="pure-g-r">   
-			    <input class="pure-u-1-2" type="text" id="amount" name="amount" autofocus required>
+			    <input class="pure-u-1-2" type="text" id="amount" name="amount" autofocus required autocomplete="off">
 			    
 			    <button class="pure-u-1-2 pure-button" id="swipe-button" type="button" onclick="setfocus();">
 			    	Click to Swipe Card

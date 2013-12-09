@@ -103,14 +103,17 @@
 </script>
 <style>
     #ccn {
-      width: 0px;
-      height: 0px;
+      position: absolute;
+      left: -1000px;
+      width: 2px;
+      height: 25px;
       border: none;
       background: transparent;
       float:right;
       margin-right: 135px;
     }
     #message {
+      margin-top: 20px;
       color: green;
       visibility: hidden;
       margin-bottom: 20px;
@@ -168,7 +171,7 @@
 	<div class="pure-g-r">
 		<% if(!errorMessage.isEmpty()) { %>
 			<div class="pure-u-1 error">
-				<p><strong>An error occured while processing the request:</strong></p>
+				<p><strong>An error occurred while processing the request:</strong></p>
 				<ul> 
 					<%=errorMessage%>
 				</ul>
@@ -188,7 +191,7 @@
 			    	Click to Swipe Card
 			    </button>
 			</div>
-			<input class="pure-u-1" type="text" id="ccn" name="ccn" onblur="hidemessage();" 
+			<input class="pure-u-1" type="text" id="ccn" name="ccn" onblur="hidemessage();" autocomplete="off"
 			 required title="Please press the button above and slide a card to continue.">
 			
 			<div class="pure-u-1 center" id="message" >Ready to Swipe</div>
@@ -213,6 +216,7 @@ $(document).ready(function(){
     ccn.oninvalid = function(e) {
         e.target.setCustomValidity("");
         if (!e.target.validity.valid) {
+        	console.log(ccn.value);
             e.target.setCustomValidity("Please press the button above and slide a card to continue.");
         }
     };
@@ -220,14 +224,15 @@ $(document).ready(function(){
         e.target.setCustomValidity("");
     };
     
-    ccn = document.getElementById("amount");
-    ccn.oninvalid = function(e) {
+    amnt = document.getElementById("amount");
+    amnt.oninvalid = function(e) {
         e.target.setCustomValidity("");
         if (!e.target.validity.valid) {
+        	console.log(amnt.value);
             e.target.setCustomValidity("Please enter a cost to be charged.");
         }
     };
-    ccn.oninput = function(e) {
+    amnt.oninput = function(e) {
         e.target.setCustomValidity("");
     };
 
