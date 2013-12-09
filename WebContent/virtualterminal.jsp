@@ -43,6 +43,11 @@
 					errorMessage += "<li>Card issuer not the database.</li>";
 				}
 				else {
+					
+					if ((issuer.isLuhn) && (!paymentCard.isLuhnNumber())) {
+						errorMessage += "<li>Primary card number is not valid luhn number</li>";
+					}
+					
 					CardHolder cardHolder = gateway.getCardHolder(issuer, paymentCard.primaryAccountNumber);
 					if(cardHolder == null) {
 						// cardholder not in database
@@ -51,18 +56,16 @@
 					else {
 						if(paymentCard.isExpired()) {
 							//http gotos
+							errorMessage += "<li>Your card is expired</li>";
 							response.sendRedirect("expired.jsp");
 						}
+						
 						// insufficent funds... duh
 						if(cardHolder.balance < toCharge) {
 							errorMessage += "<li>Insufficient funds.</li>";
 						}
-						else if(issuer.isLuhn) {
-							if(!paymentCard.isLuhnNumber()) {
-								errorMessage += "<li>Primary card number is not valid luhn number</li>";
-							}
-						}
-						else {
+						
+						if ("".equals(errorMessage)) {
 							//set session variables
 							//TODO: MERCHANT IS HARDCODED
 							request.getSession().setAttribute("cardHolder", cardHolder);
